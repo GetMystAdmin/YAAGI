@@ -1,0 +1,34 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<App /> should render and match the snapshot 1`] = `
+<BrowserRouter>
+  <Helmet
+    defaultTitle="YAAGI - Yet Another Agent of General Intelligence"
+    defer={true}
+    encodeSpecialCharacters={true}
+    htmlAttributes={
+      Object {
+        "lang": "en-US",
+      }
+    }
+    prioritizeSeoTags={false}
+    titleTemplate="%s - YAAGI - Yet Another Agent of General Intelligence"
+  >
+    <meta
+      content="A YAAGI - Yet Another Agent of General Intelligence application"
+      name="description"
+    />
+  </Helmet>
+  <Routes>
+    <Route
+      element={<Unknown />}
+      path="/"
+    />
+    <Route
+      element={<Unknown />}
+      path="*"
+    />
+  </Routes>
+  <Memo(l) />
+</BrowserRouter>
+`;
