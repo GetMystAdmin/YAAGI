@@ -1,8 +1,3 @@
-"""
-Filename: MetaGPT/examples/build_customized_agent.py
-Created Date: Tuesday, September 19th 2023, 6:52:25 pm
-Author: garylin2099
-"""
 import asyncio
 import re
 import subprocess
@@ -100,6 +95,3 @@ def main(msg="write a function that calculates the product of a list and run it"
     result = asyncio.run(role.run(msg))
     logger.info(result)
     return result
-
-if __name__ == "__main__":
-    fire.Fire(main)

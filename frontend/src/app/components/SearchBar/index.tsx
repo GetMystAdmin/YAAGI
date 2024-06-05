@@ -52,7 +52,12 @@ export const SearchBar = memo(
                     { headers: { 'Content-Type': 'application/json' } },
                 );
                 const aiResult = response.data.result;
+                console.log(aiResult);
                 setResult(aiResult);
+                if (aiResult == "success") {
+                    // If the AI agent creation was successful, then we will trigger a Search again.
+                    handleSearch();
+                }
             }
 
         } catch (e) {

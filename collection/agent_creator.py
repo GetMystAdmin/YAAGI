@@ -26,6 +26,7 @@ class CreateAgent(Action):
     ### TASK
     Now you should create an agent with appropriate actions based on the instruction, consider carefully about
     the PROMPT_TEMPLATE of all actions and when to call self._aask()
+    main should have input argument just like the example
     ### INSTRUCTION
     {instruction}
     ### YOUR CODE
@@ -105,7 +106,7 @@ async def main(query="write a testing code (str) for testing the given code snip
     msg = """
     Write an agent that will do the following:
     {todo}.
-    You can use pytest as the testing framework.
+    Make sure the results are accurate.
     """
     msg = msg.format(todo=query)
     creator = AgentCreator(agent_template=agent_template)
