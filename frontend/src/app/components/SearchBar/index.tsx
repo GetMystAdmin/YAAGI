@@ -45,8 +45,14 @@ export const SearchBar = memo(
                 console.log(aiResult);
             }
             else {
-                // Displaying a default message when AI Agent is not found.
                 setResult(() => "AI Agent not found, building new AI agent");   
+                const response = await axios.post(
+                    'http://localhost:5000/create-agent',
+                    { query },
+                    { headers: { 'Content-Type': 'application/json' } },
+                );
+                const aiResult = response.data.result;
+                setResult(aiResult);
             }
 
         } catch (e) {

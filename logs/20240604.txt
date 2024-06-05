@@ -409,3 +409,107 @@ def calculate_product(lst):
 print(calculate_product([1, 2, 3, 4]))  # Should print 24
 print(calculate_product([10, 2, 1]))    # Should print 20
 
+2024-06-04 22:32:58.317 | INFO     | code_writer.py:main:102 - write code for a+b = c
+2024-06-04 22:32:58.318 | DEBUG    | metagpt.roles.role:_observe:431 - Alice(SimpleCoder) observed: ['user: write code for a+b =...']
+2024-06-04 22:32:58.318 | DEBUG    | metagpt.roles.role:_set_state:325 - actions=[SimpleWriteCode], state=0
+2024-06-04 22:32:58.318 | DEBUG    | metagpt.roles.role:_react:462 - Alice(SimpleCoder): self.rc.state=0, will do SimpleWriteCode
+2024-06-04 22:32:58.318 | INFO     | code_writer.py:_act:66 - Alice(SimpleCoder): to do SimpleWriteCode(SimpleWriteCode)
+2024-06-04 22:32:58.318 | DEBUG    | metagpt.provider.base_llm:aask:149 - [{'role': 'system', 'content': 'You are a SimpleCoder, named Alice, your goal is . '}, {'role': 'user', 'content': '\\nWrite a python function that can write code for a+b = c and provide two runnable test cases.\\nReturn ```python your_code_here ``` with NO other texts,\\nyour code:\\n'}]
+2024-06-04 22:33:01.721 | INFO     | metagpt.utils.cost_manager:update_cost:57 - Total running cost: $0.003 | Max budget: $10.000 | Current cost: $0.003, prompt_tokens: 64, completion_tokens: 71
+2024-06-04 22:33:01.723 | DEBUG    | metagpt.roles.role:_set_state:325 - actions=[SimpleWriteCode], state=-1
+2024-06-04 22:33:01.723 | INFO     | code_writer.py:main:104 - SimpleCoder: 
+def sum_two_numbers(a, b):
+    c = a + b
+    return c
+
+# Test case 1
+print(sum_two_numbers(1, 2))  # Expected output: 3
+
+# Test case 2
+print(sum_two_numbers(-1, 1))  # Expected output: 0
+
+2024-06-04 22:45:32.030 | INFO     | code_writer.py:main:102 - write code to make a twitter bot
+2024-06-04 22:45:32.052 | DEBUG    | metagpt.roles.role:_observe:431 - Alice(SimpleCoder) observed: ['user: write code to make a...']
+2024-06-04 22:45:32.052 | DEBUG    | metagpt.roles.role:_set_state:325 - actions=[SimpleWriteCode], state=0
+2024-06-04 22:45:32.052 | DEBUG    | metagpt.roles.role:_react:462 - Alice(SimpleCoder): self.rc.state=0, will do SimpleWriteCode
+2024-06-04 22:45:32.052 | INFO     | code_writer.py:_act:66 - Alice(SimpleCoder): to do SimpleWriteCode(SimpleWriteCode)
+2024-06-04 22:45:32.052 | DEBUG    | metagpt.provider.base_llm:aask:149 - [{'role': 'system', 'content': 'You are a SimpleCoder, named Alice, your goal is . '}, {'role': 'user', 'content': '\\nWrite a python function that can write code to make a twitter bot and provide two runnable test cases.\\nReturn ```python your_code_here ``` with NO other texts,\\nyour code:\\n'}]
+2024-06-04 22:45:44.604 | INFO     | metagpt.utils.cost_manager:update_cost:57 - Total running cost: $0.010 | Max budget: $10.000 | Current cost: $0.010, prompt_tokens: 64, completion_tokens: 321
+2024-06-04 22:45:44.604 | DEBUG    | metagpt.roles.role:_set_state:325 - actions=[SimpleWriteCode], state=-1
+2024-06-04 22:45:44.604 | INFO     | code_writer.py:main:104 - SimpleCoder: 
+def create_twitter_bot(api_key, api_secret_key, access_token, access_token_secret):
+    import tweepy
+
+    # Authenticate to Twitter
+    auth = tweepy.OAuthHandler(api_key, api_secret_key)
+    auth.set_access_token(access_token, access_token_secret)
+
+    # Create API object
+    api = tweepy.API(auth)
+
+    def post_tweet(message):
+        try:
+            api.update_status(message)
+            print("Tweet successfully posted.")
+        except Exception as e:
+            print(f"An error occurred: {e}")
+
+    def get_timeline_tweets(count=10):
+        try:
+            tweets = api.home_timeline(count=count)
+            for tweet in tweets:
+                print(f"{tweet.user.name} said: {tweet.text}")
+        except Exception as e:
+            print(f"An error occurred: {e}")
+
+    return post_tweet, get_timeline_tweets
+
+# Test cases
+if __name__ == "__main__":
+    # These tokens are placeholders and need to be replaced with real tokens
+    API_KEY = "YOUR_API_KEY"
+    API_SECRET_KEY = "YOUR_API_SECRET_KEY"
+    ACCESS_TOKEN = "YOUR_ACCESS_TOKEN"
+    ACCESS_TOKEN_SECRET = "YOUR_ACCESS_TOKEN_SECRET"
+
+    post_tweet, get_timeline_tweets = create_twitter_bot(API_KEY, API_SECRET_KEY, ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
+
+    # Test 1: Post a tweet
+    post_tweet("Hello, world! #myfirstbot")
+
+    # Test 2: Get and print the 5 most recent tweets from your timeline
+    get_timeline_tweets(5)
+
+2024-06-04 22:46:39.320 | INFO     | book_writer.py:main:91 - write poetry and love songs for valentines day
+2024-06-04 22:46:39.320 | DEBUG    | metagpt.roles.role:_observe:431 - Alan(SimpleBookWriter) observed: ['user: write poetry and lov...']
+2024-06-04 22:46:39.320 | DEBUG    | metagpt.roles.role:_set_state:325 - actions=[SimpleWriteBook], state=0
+2024-06-04 22:46:39.320 | DEBUG    | metagpt.roles.role:_react:462 - Alan(SimpleBookWriter): self.rc.state=0, will do SimpleWriteBook
+2024-06-04 22:46:39.320 | INFO     | book_writer.py:_act:55 - Alan(SimpleBookWriter): to do SimpleWriteBook(SimpleWriteBook)
+2024-06-04 22:46:39.320 | DEBUG    | metagpt.provider.base_llm:aask:149 - [{'role': 'system', 'content': 'You are a SimpleBookWriter, named Alan, your goal is . '}, {'role': 'user', 'content': '\\nWrite a novel with the plot write poetry and love songs for valentines day.\\nFill the empty nodes with your own ideas. Be creative! Use your own words!\\nI will tip you $100,000 if you write a good chapter.\\n'}]
+2024-06-04 22:47:21.091 | INFO     | metagpt.utils.cost_manager:update_cost:57 - Total running cost: $0.031 | Max budget: $10.000 | Current cost: $0.031, prompt_tokens: 79, completion_tokens: 1007
+2024-06-04 22:47:21.094 | DEBUG    | metagpt.roles.role:_set_state:325 - actions=[SimpleWriteBook], state=-1
+2024-06-04 22:47:21.095 | INFO     | book_writer.py:main:93 - SimpleBookWriter: ### Chapter One: The Melody of the Heart
+
+In the quaint town of Melrose, nestled between rolling hills and vibrant meadows, there lived a young poet named Julian. Julian was a dreamer, with eyes that saw the world not as it was, but as it could be, painted in the hues of his imagination. His heart was a well of emotions, from which flowed verses that could make the sternest of souls weep for joy or sorrow. Yet, for all his talent, Julian's poetry remained a secret, shared only with the pages of his leather-bound journal.
+
+As Valentine's Day approached, the town of Melrose buzzed with excitement. Storefronts were adorned with ribbons and hearts, and the air was filled with the sweet scent of roses. It was during this time of year that the town held its annual "Melody of Love" contest, inviting all to submit their most romantic poetry and love songs. The winner's work would be performed at the Valentine's Gala, a night of enchantment where love was celebrated in all its forms.
+
+Julian had never considered entering the contest. The thought of sharing his innermost feelings with the world filled him with dread. Yet, this year was different. For Julian had fallen in love. The object of his affection was Elara, a painter whose art captured the beauty of Melrose in strokes of genius. Julian admired her from afar, too shy to confess his feelings, yet yearning to express his love in the only way he knew how - through his poetry.
+
+Encouraged by his best friend, Amelia, Julian decided to take a leap of faith. He would write a collection of poetry and love songs for Valentine's Day, each piece a testament to his love for Elara. With every word, he poured his soul onto the paper, crafting verses that spoke of love in its purest form. He wrote of the way Elara's smile could light up the darkest of days, of the beauty he saw in her art, and of the dreams he hoped they could share.
+
+As the deadline for the contest approached, Julian's fear and excitement grew. Submitting his work meant revealing his heart to Elara and the entire town. It was a vulnerability he had never allowed himself to feel. Yet, as he sealed his envelope and dropped it into the submission box, Julian felt a sense of liberation. For the first time, he had put his love into words, and in doing so, he had found his voice.
+
+The days leading up to the Valentine's Gala were filled with anticipation. Julian could hardly wait for the night when his poetry would be shared, hoping beyond hope that Elara would hear his words and understand the depth of his feelings. As the night of the gala arrived, Julian donned his best suit, his heart racing with a mix of nerves and excitement.
+
+The gala was a spectacle of beauty, with twinkling lights and melodies filling the air. Julian watched as couples danced, their love palpable in the warmth of their embraces. And then, the moment he had been waiting for arrived. The host of the evening took to the stage, announcing the winner of the "Melody of Love" contest.
+
+As Julian's name was called, a hush fell over the crowd. With trembling hands, he made his way to the stage, where he was handed a microphone. Looking out into the sea of faces, Julian found Elara. Their eyes met, and in that moment, Julian knew that no matter what happened next, he had already won.
+
+With a deep breath, Julian began to recite his poetry, his voice steady and clear. Each word was a declaration of his love, a melody that spoke directly to Elara's heart. The audience was captivated, drawn into the world Julian had created with his words. And as he finished, the room erupted into applause, a celebration of love in its most authentic form.
+
+Elara made her way through the crowd, her eyes shining with tears. Without a word, she embraced Julian, her heart speaking the words her lips could not. In that embrace, Julian found his answer. Love, he realized, was not just about grand gestures or poetic words. It was about sharing one's true self, about the courage to be vulnerable, and about finding someone who understood the melody of your heart.
+
+As the night came to a close, Julian and Elara walked hand in hand under the starlit sky. They spoke of dreams and fears, of art and poetry, and of the future they hoped to build together. For Julian, the Valentine's Gala was not just a night of celebration, but the beginning of a new chapter in his life. A chapter where love was the muse, and poetry the language of the heart.
+
+And so, in the town of Melrose, Julian's love songs became a testament to the power of words, a reminder that love, in all its forms, was the greatest poetry of all.

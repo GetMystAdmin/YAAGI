@@ -66,15 +66,46 @@ def ask_ai():
 
     # call the 'run' function from the module
     generator_object = module.main(query)
-
+    print(generator_object)
     # convert set to list
-    list_outputs = [output for output in list(generator_object)]
+    try:
+        list_outputs = [output for output in list(generator_object)]
+    except:
+        try:
+            list_outputs = generator_object
+        except:
+            list_outputs = []
     # Extract the content from the message object
     content_output = [output[1] for output in list_outputs if output[0] == 'content']
     return jsonify({
         'file_output': content_output
     })
 
+@app.route('/create-agent', methods=['POST'])
+@cross_origin()
+def create_agent():
+    data = request.get_json()
+    query = data['query']
+
+    # Path to the "agent_creator" module
+    module_path = 'collection/agent_creator.py'
+    import asyncio
+    # Load and import the module dynamically
+    spec = importlib.util.spec_from_file_location("agent_creator", module_path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    # Call the 'main' function from the module
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    result = loop.run_until_complete(module.main(query))
+    print(result)
+    list_outputs = [output for output in list(result)]
+    # Extract the content from the message object
+    content_output = [output[1] for output in list_outputs if output[0] == 'content']
+    return jsonify({
+        'result': result
+    })
 
 if __name__ == "__main__":
     app.run(debug=True)
