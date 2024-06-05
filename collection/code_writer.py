@@ -17,7 +17,7 @@ import pandas as pd
 from typing import ClassVar
 
 # Load CSV file
-prompts_df = pd.read_csv('prompt_db/all_prompts.csv')
+prompts_df = pd.read_csv('collection/prompt_db/all_prompts.csv')
 
 class SimpleWriteCode(Action):
 
@@ -97,12 +97,12 @@ class RunnableCoder(Role):
 
 
 def main(msg="write a function that calculates the product of a list and run it"):
-    # role = SimpleCoder()
-    role = RunnableCoder()
+    role = SimpleCoder()
+    # role = RunnableCoder()
     logger.info(msg)
     result = asyncio.run(role.run(msg))
     logger.info(result)
-
+    return result
 
 if __name__ == "__main__":
     fire.Fire(main)

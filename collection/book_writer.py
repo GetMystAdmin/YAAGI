@@ -16,7 +16,7 @@ from metagpt.schema import Message
 import pandas as pd
 from typing import ClassVar
 # Load CSV file
-prompts_df = pd.read_csv('prompt_db/all_prompts.csv')
+prompts_df = pd.read_csv('collection/prompt_db/all_prompts.csv')
 
 class SimpleWriteBook(Action):
 
@@ -91,7 +91,7 @@ def main(msg="write a book that talks about gandalf trying to collect dragonball
     logger.info(msg)
     result = asyncio.run(role.run(msg))
     logger.info(result)
-
+    return result
 
 if __name__ == "__main__":
     fire.Fire(main)
