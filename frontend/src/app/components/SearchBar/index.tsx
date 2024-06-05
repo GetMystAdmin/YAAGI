@@ -3,6 +3,9 @@ import React, { memo, useState } from 'react';
 import styled from 'styled-components/macro';
 import axios from 'axios';
 import { Dialog, CircularProgress } from '@mui/material';
+import { csvParse, csvFormat } from 'd3-dsv';
+import { csv } from 'd3';
+import { writeFileSync } from 'fs';
 
 type InputProps = React.DetailedHTMLProps<
   React.InputHTMLAttributes<HTMLInputElement>,
@@ -18,7 +21,49 @@ export const SearchBar = memo(
   ({ id, className, ...restOf }: Props) => {
     const [isLoading, setLoading] = useState(false);
     const [query, setQuery] = useState('');
-    const [result, setResult] = useState<string|null>(null);
+    const [result, setResult] = useState<string | null>(null);
+
+    const handleFeedback = async (rating: number) => {
+      console.log(`User rating: ${rating}`);
+
+      try {
+        const allPrompts = await csv("/public/collection/prompts_db/all_prompts.csv");
+
+        const randomIndex = Math.floor(Math.random() * allPrompts.length);
+        const randomRow = allPrompts[randomIndex];
+
+        const cols = ['A_count', 'B_count', 'C_count', 'D_count'];
+        const randomCol = cols[Math.floor(Math.random() * cols.length)];
+
+        const currentCountValue = Number(randomRow[randomCol]);
+        if (currentCountValue) { // Check if count value is a number
+            switch (currentCountValue) {
+              case 1:
+              case 2:
+                randomRow[randomCol] = currentCountValue - 1;
+                break;
+              case 4:
+              case 5:
+                randomRow[randomCol] = currentCountValue + 1;
+                break;
+              case 3:
+                break;
+              default:
+                console.log('No changes applied');
+            }
+        }
+
+        console.log(randomRow);
+
+        const csvContent = csvFormat(allPrompts);
+        //writeFileSync('/public/collection/prompts_db/all_prompts.csv', csvContent);
+
+        alert("Feedback recorded successfully");
+      } catch (error) {
+        console.error(`Error in processing feedback: ${error}`);
+        alert("Failed to record feedback");
+    }
+    }
 
     // Trigger the API call when button is pressed
     const handleSearch = async () => {
@@ -93,6 +138,16 @@ export const SearchBar = memo(
             <div className="resultSection">
                 {result && <pre>{result}</pre>}
             </div>
+
+            {/* Feedback section */}
+            <div className="feedbackSection">
+              <p>Rate the output:</p>
+              {['⭐️', '⭐️', '⭐️', '⭐️', '⭐️'].map((star, index) => (
+                <button key={index} onClick={() => handleFeedback(index + 1)}>
+                  {star}
+                </button>
+              ))}
+            </div>
         </Wrapper>
     );
   },
@@ -126,6 +181,21 @@ const Wrapper = styled.div`
         border: none;
         padding: 5px 10px;
     }
+  }
+
+  .feedbackSection {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+    gap: 1rem;
+
+    button {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: gold;
+      }
   }
 
     .resultSection {
