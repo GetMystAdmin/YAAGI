@@ -306,3 +306,222 @@ We celebrate our endless bliss.
 2024-06-05 09:57:32.945 | DEBUG    | metagpt.provider.base_llm:aask:149 - [{'role': 'system', 'content': 'You are a helpful assistant.'}, {'role': 'user', 'content': '\n    ### BACKGROUND\n    You are using an agent framework called metagpt to write agents capable of different actions,\n    the usage of metagpt can be illustrated by the following example. Remember, even though the example\n    of the agent is of programming, the agents task can be non-programming as well:\n    ### EXAMPLE STARTS AT THIS LINE\n    """\nFilename: MetaGPT/examples/build_customized_agent.py\nCreated Date: Tuesday, September 19th 2023, 6:52:25 pm\nAuthor: garylin2099\n"""\nimport asyncio\nimport re\nimport subprocess\n\nimport fire\n\nfrom metagpt.actions import Action\nfrom metagpt.logs import logger\nfrom metagpt.roles.role import Role, RoleReactMode\nfrom metagpt.schema import Message\n\n\nclass SimpleWriteCode(Action):\n    PROMPT_TEMPLATE: str = """\n    Write a python function that can {instruction} and provide two runnable test cases.\n    Return ```python your_code_here ``` with NO other texts,\n    your code:\n    """\n\n    name: str = "SimpleWriteCode"\n\n    async def run(self, instruction: str):\n        prompt = self.PROMPT_TEMPLATE.format(instruction=instruction)\n\n        rsp = await self._aask(prompt)\n\n        code_text = SimpleWriteCode.parse_code(rsp)\n\n        return code_text\n\n    @staticmethod\n    def parse_code(rsp):\n        pattern = r"```python(.*)```"\n        match = re.search(pattern, rsp, re.DOTALL)\n        code_text = match.group(1) if match else rsp\n        return code_text\n\n\nclass SimpleRunCode(Action):\n    name: str = "SimpleRunCode"\n\n    async def run(self, code_text: str):\n        result = subprocess.run(["python3", "-c", code_text], capture_output=True, text=True)\n        code_result = result.stdout\n        logger.info(f"{code_result=}")\n        return code_result\n\n\nclass SimpleCoder(Role):\n    name: str = "Alice"\n    profile: str = "SimpleCoder"\n\n    def __init__(self, **kwargs):\n        super().__init__(**kwargs)\n        self.set_actions([SimpleWriteCode])\n\n    async def _act(self) -> Message:\n        logger.info(f"{self._setting}: to do {self.rc.todo}({self.rc.todo.name})")\n        todo = self.rc.todo  # todo will be SimpleWriteCode()\n\n        msg = self.get_memories(k=1)[0]  # find the most recent messages\n        code_text = await todo.run(msg.content)\n        msg = Message(content=code_text, role=self.profile, cause_by=type(todo))\n\n        return msg\n\n\nclass RunnableCoder(Role):\n    name: str = "Alice"\n    profile: str = "RunnableCoder"\n\n    def __init__(self, **kwargs):\n        super().__init__(**kwargs)\n        self.set_actions([SimpleWriteCode, SimpleRunCode])\n        self._set_react_mode(react_mode=RoleReactMode.BY_ORDER.value)\n\n    async def _act(self) -> Message:\n        logger.info(f"{self._setting}: to do {self.rc.todo}({self.rc.todo.name})")\n        # By choosing the Action by order under the hood\n        # todo will be first SimpleWriteCode() then SimpleRunCode()\n        todo = self.rc.todo\n\n        msg = self.get_memories(k=1)[0]  # find the most k recent messages\n        result = await todo.run(msg.content)\n\n        msg = Message(content=result, role=self.profile, cause_by=type(todo))\n        self.rc.memory.add(msg)\n        return msg\n\n\ndef main(msg="write a function that calculates the product of a list and run it"):\n    # role = SimpleCoder()\n    role = RunnableCoder()\n    logger.info(msg)\n    result = asyncio.run(role.run(msg))\n    logger.info(result)\n    return result\n\n    ### EXAMPLE ENDS AT THIS LINE\n    ### TASK\n    Now you should create an agent with appropriate actions based on the instruction, consider carefully about\n    the PROMPT_TEMPLATE of all actions and when to call self._aask()\n    ### INSTRUCTION\n    \n    Write an agent that will do the following:\n    make poetry and love songs for valentines day.\n    You can use pytest as the testing framework.\n    \n    ### YOUR CODE\n    Return ```python your_code_here ``` with NO other texts, your code:\n    '}]
 2024-06-05 09:58:03.720 | INFO     | metagpt.utils.cost_manager:update_cost:57 - Total running cost: $0.023 | Max budget: $10.000 | Current cost: $0.023, prompt_tokens: 931, completion_tokens: 470
 2024-06-05 09:58:03.723 | DEBUG    | metagpt.roles.role:_set_state:325 - actions=[CreateAgent], state=-1
+2024-06-05 10:00:15.405 | DEBUG    | metagpt.roles.role:_observe:431 - Matrix(AgentCreator) observed: ['user: \n    Write an agent ...']
+2024-06-05 10:00:15.405 | DEBUG    | metagpt.roles.role:_set_state:325 - actions=[CreateAgent], state=0
+2024-06-05 10:00:15.405 | DEBUG    | metagpt.roles.role:_react:462 - Matrix(AgentCreator): self.rc.state=0, will do CreateAgent
+2024-06-05 10:00:15.405 | INFO     | agent_creator:_act:90 - Matrix(AgentCreator): to do CreateAgent(CreateAgent)
+2024-06-05 10:00:15.605 | DEBUG    | metagpt.provider.base_llm:aask:149 - [{'role': 'system', 'content': 'You are a helpful assistant.'}, {'role': 'user', 'content': '\n    ### BACKGROUND\n    You are using an agent framework called metagpt to write agents capable of different actions,\n    the usage of metagpt can be illustrated by the following example. Remember, even though the example\n    of the agent is of programming, the agents task can be non-programming as well:\n    ### EXAMPLE STARTS AT THIS LINE\n    import asyncio\nimport re\nimport subprocess\n\nimport fire\n\nfrom metagpt.actions import Action\nfrom metagpt.logs import logger\nfrom metagpt.roles.role import Role, RoleReactMode\nfrom metagpt.schema import Message\n\n\nclass SimpleWriteCode(Action):\n    PROMPT_TEMPLATE: str = """\n    Write a python function that can {instruction} and provide two runnable test cases.\n    Return ```python your_code_here ``` with NO other texts,\n    your code:\n    """\n\n    name: str = "SimpleWriteCode"\n\n    async def run(self, instruction: str):\n        prompt = self.PROMPT_TEMPLATE.format(instruction=instruction)\n\n        rsp = await self._aask(prompt)\n\n        code_text = SimpleWriteCode.parse_code(rsp)\n\n        return code_text\n\n    @staticmethod\n    def parse_code(rsp):\n        pattern = r"```python(.*)```"\n        match = re.search(pattern, rsp, re.DOTALL)\n        code_text = match.group(1) if match else rsp\n        return code_text\n\n\nclass SimpleRunCode(Action):\n    name: str = "SimpleRunCode"\n\n    async def run(self, code_text: str):\n        result = subprocess.run(["python3", "-c", code_text], capture_output=True, text=True)\n        code_result = result.stdout\n        logger.info(f"{code_result=}")\n        return code_result\n\n\nclass SimpleCoder(Role):\n    name: str = "Alice"\n    profile: str = "SimpleCoder"\n\n    def __init__(self, **kwargs):\n        super().__init__(**kwargs)\n        self.set_actions([SimpleWriteCode])\n\n    async def _act(self) -> Message:\n        logger.info(f"{self._setting}: to do {self.rc.todo}({self.rc.todo.name})")\n        todo = self.rc.todo  # todo will be SimpleWriteCode()\n\n        msg = self.get_memories(k=1)[0]  # find the most recent messages\n        code_text = await todo.run(msg.content)\n        msg = Message(content=code_text, role=self.profile, cause_by=type(todo))\n\n        return msg\n\n\nclass RunnableCoder(Role):\n    name: str = "Alice"\n    profile: str = "RunnableCoder"\n\n    def __init__(self, **kwargs):\n        super().__init__(**kwargs)\n        self.set_actions([SimpleWriteCode, SimpleRunCode])\n        self._set_react_mode(react_mode=RoleReactMode.BY_ORDER.value)\n\n    async def _act(self) -> Message:\n        logger.info(f"{self._setting}: to do {self.rc.todo}({self.rc.todo.name})")\n        # By choosing the Action by order under the hood\n        # todo will be first SimpleWriteCode() then SimpleRunCode()\n        todo = self.rc.todo\n\n        msg = self.get_memories(k=1)[0]  # find the most k recent messages\n        result = await todo.run(msg.content)\n\n        msg = Message(content=result, role=self.profile, cause_by=type(todo))\n        self.rc.memory.add(msg)\n        return msg\n\n\ndef main(msg="write a function that calculates the product of a list and run it"):\n    # role = SimpleCoder()\n    role = RunnableCoder()\n    logger.info(msg)\n    result = asyncio.run(role.run(msg))\n    logger.info(result)\n    return result\n\n    ### EXAMPLE ENDS AT THIS LINE\n    ### TASK\n    Now you should create an agent with appropriate actions based on the instruction, consider carefully about\n    the PROMPT_TEMPLATE of all actions and when to call self._aask()\n    main should have input argument just like the example\n    ### INSTRUCTION\n    \n    Write an agent that will do the following:\n    make poetry and love songs for valentines day.\n    Make sure the results are accurate.\n    \n    ### YOUR CODE\n    Return ```python your_code_here ``` with NO other texts, your code:\n    '}]
+2024-06-05 10:00:40.433 | INFO     | metagpt.utils.cost_manager:update_cost:57 - Total running cost: $0.025 | Max budget: $10.000 | Current cost: $0.025, prompt_tokens: 897, completion_tokens: 546
+2024-06-05 10:00:40.433 | DEBUG    | metagpt.roles.role:_set_state:325 - actions=[CreateAgent], state=-1
+2024-06-05 10:00:40.765 | INFO     | make_poetry_and_love_songs_for_valentines_day.py:main:85 - make poetry and love songs for valentines day
+2024-06-05 10:00:40.765 | DEBUG    | metagpt.roles.role:_observe:431 - Cupid(ValentineAgent) observed: ['user: make poetry and love...']
+2024-06-05 10:00:40.765 | DEBUG    | metagpt.roles.role:_set_state:325 - actions=[CreatePoetry, CreateLoveSong], state=0
+2024-06-05 10:00:40.765 | INFO     | make_poetry_and_love_songs_for_valentines_day.py:_act:73 - Cupid(ValentineAgent): to do CreatePoetry(CreatePoetry)
+2024-06-05 10:00:40.765 | DEBUG    | metagpt.provider.base_llm:aask:149 - [{'role': 'system', 'content': 'You are a ValentineAgent, named Cupid, your goal is . '}, {'role': 'user', 'content': "\n    Create a romantic poem for Valentine's Day.\n    Return ```python your_poem_here ``` with NO other texts,\n    your poem:\n    "}]
+2024-06-05 10:00:50.497 | INFO     | metagpt.utils.cost_manager:update_cost:57 - Total running cost: $0.006 | Max budget: $10.000 | Current cost: $0.006, prompt_tokens: 56, completion_tokens: 189
+2024-06-05 10:00:50.512 | DEBUG    | metagpt.roles.role:_set_state:325 - actions=[CreatePoetry, CreateLoveSong], state=1
+2024-06-05 10:00:50.512 | INFO     | make_poetry_and_love_songs_for_valentines_day.py:_act:73 - Cupid(ValentineAgent): to do CreateLoveSong(CreateLoveSong)
+2024-06-05 10:00:50.512 | DEBUG    | metagpt.provider.base_llm:aask:149 - [{'role': 'system', 'content': 'You are a ValentineAgent, named Cupid, your goal is . '}, {'role': 'user', 'content': "\n    Write a love song suitable for Valentine's Day.\n    Return ```python your_song_here ``` with NO other texts,\n    your song:\n    "}]
+2024-06-05 10:01:12.011 | INFO     | metagpt.utils.cost_manager:update_cost:57 - Total running cost: $0.021 | Max budget: $10.000 | Current cost: $0.014, prompt_tokens: 56, completion_tokens: 464
+2024-06-05 10:01:12.027 | DEBUG    | metagpt.roles.role:_set_state:325 - actions=[CreatePoetry, CreateLoveSong], state=-1
+2024-06-05 10:01:12.027 | INFO     | make_poetry_and_love_songs_for_valentines_day.py:main:87 - ValentineAgent: "Verse 1:\n" \
+"Under the velvet sky, where dreams whisper soft,\n" \
+"Two hearts in the moonlight, their beats aloft.\n" \
+"Hand in hand, souls entwined, in love's gentle embrace,\n" \
+"Finding in each other, a timeless grace.\n" \
+"\n" \
+"Chorus:\n" \
+"Love, like a melody, plays on repeat,\n" \
+"In every heartbeat, in every sweet feat.\n" \
+"On this Valentine's, let's make a vow,\n" \
+"To love forever, from this moment now.\n" \
+"\n" \
+"Verse 2:\n" \
+"Through the storms and the calm, together we'll sail,\n" \
+"With love as our compass, we shall not fail.\n" \
+"Whispers of forever, in the air we breathe,\n" \
+"In the warmth of your arms, I find my reprieve.\n" \
+"\n" \
+"Chorus:\n" \
+"Love, like a melody, plays on repeat,\n" \
+"In every heartbeat, in every sweet feat.\n" \
+"On this Valentine's, let's make a vow,\n" \
+"To love forever, from this moment now.\n" \
+"\n" \
+"Bridge:\n" \
+"In the dance of the stars, in the glow of the moon,\n" \
+"Our love's a symphony, the world's sweetest tune.\n" \
+"With every breath, with every kiss,\n" \
+"We write our story, a tale of bliss.\n" \
+"\n" \
+"Chorus:\n" \
+"Love, like a melody, plays on repeat,\n" \
+"In every heartbeat, in every sweet feat.\n" \
+"On this Valentine's, let's make a vow,\n" \
+"To love forever, from this moment now.\n" \
+"\n" \
+"Outro:\n" \
+"Under the velvet sky, with stars above,\n" \
+"Let's celebrate this day, with endless love.\n" \
+"Hand in hand, with hearts so true,\n" \
+"On this Valentine's, I choose you."
+2024-06-05 10:05:54.153 | INFO     | make_poetry_and_love_songs_for_valentines_day.py:main:85 - make poetry and love songs for valentines day
+2024-06-05 10:05:54.153 | DEBUG    | metagpt.roles.role:_observe:431 - Cupid(ValentineAgent) observed: ['user: make poetry and love...']
+2024-06-05 10:05:54.153 | DEBUG    | metagpt.roles.role:_set_state:325 - actions=[CreatePoetry, CreateLoveSong], state=0
+2024-06-05 10:05:54.153 | INFO     | make_poetry_and_love_songs_for_valentines_day.py:_act:73 - Cupid(ValentineAgent): to do CreatePoetry(CreatePoetry)
+2024-06-05 10:05:54.153 | DEBUG    | metagpt.provider.base_llm:aask:149 - [{'role': 'system', 'content': 'You are a ValentineAgent, named Cupid, your goal is . '}, {'role': 'user', 'content': "\n    Create a romantic poem for Valentine's Day.\n    Return ```python your_poem_here ``` with NO other texts,\n    your poem:\n    "}]
+2024-06-05 10:06:07.204 | INFO     | metagpt.utils.cost_manager:update_cost:57 - Total running cost: $0.006 | Max budget: $10.000 | Current cost: $0.006, prompt_tokens: 56, completion_tokens: 190
+2024-06-05 10:06:07.204 | DEBUG    | metagpt.roles.role:_set_state:325 - actions=[CreatePoetry, CreateLoveSong], state=1
+2024-06-05 10:06:07.212 | INFO     | make_poetry_and_love_songs_for_valentines_day.py:_act:73 - Cupid(ValentineAgent): to do CreateLoveSong(CreateLoveSong)
+2024-06-05 10:06:07.212 | DEBUG    | metagpt.provider.base_llm:aask:149 - [{'role': 'system', 'content': 'You are a ValentineAgent, named Cupid, your goal is . '}, {'role': 'user', 'content': "\n    Write a love song suitable for Valentine's Day.\n    Return ```python your_song_here ``` with NO other texts,\n    your song:\n    "}]
+2024-06-05 10:06:22.927 | INFO     | metagpt.utils.cost_manager:update_cost:57 - Total running cost: $0.017 | Max budget: $10.000 | Current cost: $0.011, prompt_tokens: 56, completion_tokens: 344
+2024-06-05 10:06:22.935 | DEBUG    | metagpt.roles.role:_set_state:325 - actions=[CreatePoetry, CreateLoveSong], state=-1
+2024-06-05 10:06:22.935 | INFO     | make_poetry_and_love_songs_for_valentines_day.py:main:87 - ValentineAgent: "Verse 1:
+In a world full of shadows, you're my endless light,
+A beacon in the darkness, shining oh so bright.
+With every beat of my heart, I feel you close to me,
+A melody of love, as sweet as can be.
+
+Chorus:
+This Valentine's Day, I sing this song for you,
+A testament of love, forever pure and true.
+With every note and lyric, my heart I do convey,
+In this simple melody, my love I display.
+
+Verse 2:
+Through seasons and time, my love only grows,
+A garden of affection, where only love flows.
+Hand in hand, together, through life's twist and turn,
+With you by my side, there's nothing for which I yearn.
+
+Chorus:
+This Valentine's Day, I sing this song for you,
+A testament of love, forever pure and true.
+With every note and lyric, my heart I do convey,
+In this simple melody, my love I display.
+
+Bridge:
+In the quiet moments, in the bustling days,
+My love for you shines, in countless ways.
+No words can capture, what I feel inside,
+But in this song, my love I cannot hide.
+
+Chorus:
+This Valentine's Day, I sing this song for you,
+A testament of love, forever pure and true.
+With every note and lyric, my heart I do convey,
+In this simple melody, my love I display.
+
+Outro:
+So here's my heart, in this song I give,
+For you, my love, for as long as I live.
+This Valentine's Day, and all those to come,
+With you, my love, I am truly home."
+2024-06-05 10:07:04.819 | DEBUG    | metagpt.roles.role:_observe:431 - Matrix(AgentCreator) observed: ['user: \n    Write an agent ...']
+2024-06-05 10:07:04.819 | DEBUG    | metagpt.roles.role:_set_state:325 - actions=[CreateAgent], state=0
+2024-06-05 10:07:04.819 | DEBUG    | metagpt.roles.role:_react:462 - Matrix(AgentCreator): self.rc.state=0, will do CreateAgent
+2024-06-05 10:07:04.819 | INFO     | agent_creator:_act:90 - Matrix(AgentCreator): to do CreateAgent(CreateAgent)
+2024-06-05 10:07:05.035 | DEBUG    | metagpt.provider.base_llm:aask:149 - [{'role': 'system', 'content': 'You are a helpful assistant.'}, {'role': 'user', 'content': '\n    ### BACKGROUND\n    You are using an agent framework called metagpt to write agents capable of different actions,\n    the usage of metagpt can be illustrated by the following example. Remember, even though the example\n    of the agent is of programming, the agents task can be non-programming as well:\n    ### EXAMPLE STARTS AT THIS LINE\n    import asyncio\nimport re\nimport subprocess\n\nimport fire\n\nfrom metagpt.actions import Action\nfrom metagpt.logs import logger\nfrom metagpt.roles.role import Role, RoleReactMode\nfrom metagpt.schema import Message\n\n\nclass SimpleWriteCode(Action):\n    PROMPT_TEMPLATE: str = """\n    Write a python function that can {instruction} and provide two runnable test cases.\n    Return ```python your_code_here ``` with NO other texts,\n    your code:\n    """\n\n    name: str = "SimpleWriteCode"\n\n    async def run(self, instruction: str):\n        prompt = self.PROMPT_TEMPLATE.format(instruction=instruction)\n\n        rsp = await self._aask(prompt)\n\n        code_text = SimpleWriteCode.parse_code(rsp)\n\n        return code_text\n\n    @staticmethod\n    def parse_code(rsp):\n        pattern = r"```python(.*)```"\n        match = re.search(pattern, rsp, re.DOTALL)\n        code_text = match.group(1) if match else rsp\n        return code_text\n\n\nclass SimpleRunCode(Action):\n    name: str = "SimpleRunCode"\n\n    async def run(self, code_text: str):\n        result = subprocess.run(["python3", "-c", code_text], capture_output=True, text=True)\n        code_result = result.stdout\n        logger.info(f"{code_result=}")\n        return code_result\n\n\nclass SimpleCoder(Role):\n    name: str = "Alice"\n    profile: str = "SimpleCoder"\n\n    def __init__(self, **kwargs):\n        super().__init__(**kwargs)\n        self.set_actions([SimpleWriteCode])\n\n    async def _act(self) -> Message:\n        logger.info(f"{self._setting}: to do {self.rc.todo}({self.rc.todo.name})")\n        todo = self.rc.todo  # todo will be SimpleWriteCode()\n\n        msg = self.get_memories(k=1)[0]  # find the most recent messages\n        code_text = await todo.run(msg.content)\n        msg = Message(content=code_text, role=self.profile, cause_by=type(todo))\n\n        return msg\n\n\nclass RunnableCoder(Role):\n    name: str = "Alice"\n    profile: str = "RunnableCoder"\n\n    def __init__(self, **kwargs):\n        super().__init__(**kwargs)\n        self.set_actions([SimpleWriteCode, SimpleRunCode])\n        self._set_react_mode(react_mode=RoleReactMode.BY_ORDER.value)\n\n    async def _act(self) -> Message:\n        logger.info(f"{self._setting}: to do {self.rc.todo}({self.rc.todo.name})")\n        # By choosing the Action by order under the hood\n        # todo will be first SimpleWriteCode() then SimpleRunCode()\n        todo = self.rc.todo\n\n        msg = self.get_memories(k=1)[0]  # find the most k recent messages\n        result = await todo.run(msg.content)\n\n        msg = Message(content=result, role=self.profile, cause_by=type(todo))\n        self.rc.memory.add(msg)\n        return msg\n\n\ndef main(msg="write a function that calculates the product of a list and run it"):\n    # role = SimpleCoder()\n    role = RunnableCoder()\n    logger.info(msg)\n    result = asyncio.run(role.run(msg))\n    logger.info(result)\n    return result\n\n    ### EXAMPLE ENDS AT THIS LINE\n    ### TASK\n    Now you should create an agent with appropriate actions based on the instruction, consider carefully about\n    the PROMPT_TEMPLATE of all actions and when to call self._aask()\n    main should have input argument just like the example\n    ### INSTRUCTION\n    \n    Write an agent that will do the following:\n    make poetry and love songs for valentines day.\n    Make sure the results are accurate.\n    \n    ### YOUR CODE\n    Return ```python your_code_here ``` with NO other texts, your code:\n    '}]
+2024-06-05 10:07:32.910 | INFO     | metagpt.utils.cost_manager:update_cost:57 - Total running cost: $0.025 | Max budget: $10.000 | Current cost: $0.025, prompt_tokens: 897, completion_tokens: 546
+2024-06-05 10:07:32.922 | DEBUG    | metagpt.roles.role:_set_state:325 - actions=[CreateAgent], state=-1
+2024-06-05 10:07:33.390 | INFO     | make_poetry_and_love_songs_for_valentines_day.py:main:85 - make poetry and love songs for valentines day
+2024-06-05 10:07:33.400 | DEBUG    | metagpt.roles.role:_observe:431 - Valentine(ValentineAgent) observed: ['user: make poetry and love...']
+2024-06-05 10:07:33.400 | DEBUG    | metagpt.roles.role:_set_state:325 - actions=[CreatePoetry, CreateLoveSong], state=0
+2024-06-05 10:07:33.400 | INFO     | make_poetry_and_love_songs_for_valentines_day.py:_act:73 - Valentine(ValentineAgent): to do CreatePoetry(CreatePoetry)
+2024-06-05 10:07:33.400 | DEBUG    | metagpt.provider.base_llm:aask:149 - [{'role': 'system', 'content': 'You are a ValentineAgent, named Valentine, your goal is . '}, {'role': 'user', 'content': "\n    Create a romantic poem for Valentine's Day.\n    Return ```python your_poem_here ``` with NO other texts,\n    your poem:\n    "}]
+2024-06-05 10:07:46.141 | INFO     | metagpt.utils.cost_manager:update_cost:57 - Total running cost: $0.009 | Max budget: $10.000 | Current cost: $0.009, prompt_tokens: 55, completion_tokens: 287
+2024-06-05 10:07:46.150 | DEBUG    | metagpt.roles.role:_set_state:325 - actions=[CreatePoetry, CreateLoveSong], state=1
+2024-06-05 10:07:46.150 | INFO     | make_poetry_and_love_songs_for_valentines_day.py:_act:73 - Valentine(ValentineAgent): to do CreateLoveSong(CreateLoveSong)
+2024-06-05 10:07:46.150 | DEBUG    | metagpt.provider.base_llm:aask:149 - [{'role': 'system', 'content': 'You are a ValentineAgent, named Valentine, your goal is . '}, {'role': 'user', 'content': "\n    Write a love song suitable for Valentine's Day.\n    Return ```python your_song_here ``` with NO other texts,\n    your song:\n    "}]
+2024-06-05 10:08:18.989 | INFO     | metagpt.utils.cost_manager:update_cost:57 - Total running cost: $0.024 | Max budget: $10.000 | Current cost: $0.015, prompt_tokens: 55, completion_tokens: 488
+2024-06-05 10:08:18.999 | DEBUG    | metagpt.roles.role:_set_state:325 - actions=[CreatePoetry, CreateLoveSong], state=-1
+2024-06-05 10:08:18.999 | INFO     | make_poetry_and_love_songs_for_valentines_day.py:main:87 - ValentineAgent: "Verse 1:\n" \
+"Underneath the velvet sky, where dreams dare to fly,\n" \
+"A tale of two hearts, in whispers, they confide.\n" \
+"Through the echoes of the night, under the moon's soft light,\n" \
+"We dance to the rhythm of love, with nothing to hide.\n" \
+"\n" \
+"Chorus:\n" \
+"In the melody of your voice, I find my choice,\n" \
+"A symphony of love, in every noise.\n" \
+"With every beat of my heart, I promise to play my part,\n" \
+"On this Valentine's Day, let's never be apart.\n" \
+"\n" \
+"Verse 2:\n" \
+"Through the storms and the rain, through joy and through pain,\n" \
+"Our love stands strong, it forever will remain.\n" \
+"Like a beacon in the night, shining oh so bright,\n" \
+"You are my forever, my guiding light.\n" \
+"\n" \
+"Chorus:\n" \
+"In the melody of your voice, I find my choice,\n" \
+"A symphony of love, in every noise.\n" \
+"With every beat of my heart, I promise to play my part,\n" \
+"On this Valentine's Day, let's never be apart.\n" \
+"\n" \
+"Bridge:\n" \
+"Hand in hand, under the starlit sky,\n" \
+"Together we soar, together we fly.\n" \
+"In this moment, let's make a vow,\n" \
+"To stay in love, as we are now.\n" \
+"\n" \
+"Chorus:\n" \
+"In the melody of your voice, I find my choice,\n" \
+"A symphony of love, in every noise.\n" \
+"With every beat of my heart, I promise to play my part,\n" \
+"On this Valentine's Day, let's never be apart.\n" \
+"\n" \
+"Outro:\n" \
+"As the night turns into day, I just want to say,\n" \
+"You're my Valentine, today and every day.\n" \
+"In this journey of love, as we both grow,\n" \
+"I'll love you more than you'll ever know."
+2024-06-05 10:09:52.008 | INFO     | book_writer.py:main:91 - write some code to do a+b = c
+2024-06-05 10:09:52.013 | DEBUG    | metagpt.roles.role:_observe:431 - Alan(SimpleBookWriter) observed: ['user: write some code to d...']
+2024-06-05 10:09:52.013 | DEBUG    | metagpt.roles.role:_set_state:325 - actions=[SimpleWriteBook], state=0
+2024-06-05 10:09:52.013 | DEBUG    | metagpt.roles.role:_react:462 - Alan(SimpleBookWriter): self.rc.state=0, will do SimpleWriteBook
+2024-06-05 10:09:52.013 | INFO     | book_writer.py:_act:55 - Alan(SimpleBookWriter): to do SimpleWriteBook(SimpleWriteBook)
+2024-06-05 10:09:52.013 | DEBUG    | metagpt.provider.base_llm:aask:149 - [{'role': 'system', 'content': 'You are a SimpleBookWriter, named Alan, your goal is . '}, {'role': 'user', 'content': '\\nWrite a novel with the plot write some code to do a+b = c.\\nFill the empty nodes with your own ideas. Be creative! Use your own words!\\nI will tip you $100,000 if you write a good chapter.\\n'}]
+2024-06-05 10:10:48.587 | INFO     | metagpt.utils.cost_manager:update_cost:57 - Total running cost: $0.023 | Max budget: $10.000 | Current cost: $0.023, prompt_tokens: 78, completion_tokens: 757
+2024-06-05 10:10:48.587 | DEBUG    | metagpt.roles.role:_set_state:325 - actions=[SimpleWriteBook], state=-1
+2024-06-05 10:10:48.587 | INFO     | book_writer.py:main:93 - SimpleBookWriter: ### Chapter 1: The Mysterious Equation
+
+In the quaint town of Numeria, nestled between rolling hills and crystal-clear streams, there lived a young coder named Alex. Alex was not your ordinary coder; he was a prodigy who had mastered the languages of the digital world while others his age were still grappling with the basics. His room, a cozy attic in a charming cottage, was his sanctuary, filled with books on algorithms, quantum computing, and the history of mathematics.
+
+One stormy evening, as lightning danced across the sky and the wind howled like a pack of wolves, Alex stumbled upon an ancient book hidden beneath the floorboards. The book, bound in leather and dust, whispered secrets of a time when mathematics was magic, and equations were spells that could bend reality. Among its yellowed pages, Alex found a challenge laid down by the greatest mathematician of that bygone era, a mysterious figure known only as "The Alchemist."
+
+The challenge was deceptively simple yet infinitely complex: to solve an equation that had baffled minds for centuries. The equation was "a + b = c," but it was not as straightforward as it appeared. The Alchemist had encoded within it a secret, a key that would unlock the mysteries of the universe.
+
+Driven by curiosity and the thrill of the challenge, Alex set out to solve the equation. He knew that this was no ordinary task; it was a journey that would take him to the very edges of his intellect and beyond. Armed with his computer, a notebook filled with equations, and a burning desire to uncover the truth, Alex began his quest.
+
+As the night deepened and the storm raged on, Alex worked tirelessly, his fingers dancing over the keyboard, his mind racing through possibilities. He explored the realms of abstract algebra, ventured into the depths of number theory, and traversed the landscapes of computational complexity. Each attempt brought him closer to the answer, yet it remained just out of reach, like a mirage in the desert.
+
+Hours turned into days, and days into weeks. Alex became a recluse, his world reduced to the four walls of his room and the glowing screen of his computer. He barely ate or slept, driven by an obsession that bordered on madness. But just when it seemed that all was lost, when despair threatened to swallow him whole, Alex had a breakthrough.
+
+It was a moment of pure epiphany, as if the universe itself had whispered in his ear. He realized that the equation was not just about numbers; it was about the very fabric of reality. "a" and "b" were not mere variables, but representations of the fundamental forces of the cosmos. "c" was the synthesis of these forces, the key to unlocking the secrets of existence.
+
+With trembling hands, Alex entered the final equation into his computer and hit "Enter." The room filled with a blinding light, and for a moment, time stood still. When the light faded, Alex found himself not in his room, but in a place beyond imagination, a realm where mathematics and magic were one.
+
+The Alchemist stood before him, a smile playing on his lips. "Welcome, Alex," he said. "You have solved the equation and proven yourself worthy. Now, the true journey begins."
+
+As Alex stepped forward, his heart pounding with anticipation, he knew that his life would never be the same again. The mysteries of the universe lay open before him, waiting to be discovered. And it all began with a simple equation: a + b = c.
+
+---
+
+This chapter sets the stage for an epic adventure that blends mathematics, magic, and mystery. Alex's journey is just beginning, and the secrets he will uncover have the power to change the world.
+2024-06-05 10:12:37.513 | INFO     | code_writer.py:main:102 - create some code to do a+b = c
+2024-06-05 10:12:37.513 | DEBUG    | metagpt.roles.role:_observe:431 - Alice(SimpleCoder) observed: ['user: create some code to ...']
+2024-06-05 10:12:37.518 | DEBUG    | metagpt.roles.role:_set_state:325 - actions=[SimpleWriteCode], state=0
+2024-06-05 10:12:37.518 | DEBUG    | metagpt.roles.role:_react:462 - Alice(SimpleCoder): self.rc.state=0, will do SimpleWriteCode
+2024-06-05 10:12:37.518 | INFO     | code_writer.py:_act:66 - Alice(SimpleCoder): to do SimpleWriteCode(SimpleWriteCode)
+2024-06-05 10:12:37.518 | DEBUG    | metagpt.provider.base_llm:aask:149 - [{'role': 'system', 'content': 'You are a SimpleCoder, named Alice, your goal is . '}, {'role': 'user', 'content': '\\nWrite a python function that can create some code to do a+b = c and provide two runnable test cases.\\nReturn ```python your_code_here ``` with NO other texts,\\nyour code:\\n'}]
+2024-06-05 10:12:41.088 | INFO     | metagpt.utils.cost_manager:update_cost:57 - Total running cost: $0.002 | Max budget: $10.000 | Current cost: $0.002, prompt_tokens: 66, completion_tokens: 50
+2024-06-05 10:12:41.088 | DEBUG    | metagpt.roles.role:_set_state:325 - actions=[SimpleWriteCode], state=-1
+2024-06-05 10:12:41.098 | INFO     | code_writer.py:main:104 - SimpleCoder: 
+def add(a, b):
+    return a + b
+
+# Test cases
+print(add(1, 2))  # Should print 3
+print(add(-1, 1))  # Should print 0
+
